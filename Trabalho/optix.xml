@@ -80,6 +80,20 @@
 						<rtProgram type="MISS" 		 file="optix.ptx" proc="__miss__shadow"/> 
 					</rayType>
 				</rtDefaultMaterial>
+                <rtMaterialMap>
+                    <rtMap to = "leftSphere">
+                        <rayType name="Phong">
+                            <rtProgram type="ANY_HIT"     file="optix.ptx" proc="__anyhit__radiance"/> 
+                            <rtProgram type="CLOSEST_HIT" file="optix.ptx" proc="__closesthit__phong_metal"/> 
+                            <rtProgram type="MISS"        file="optix.ptx" proc="__miss__radiance"/> 
+                        </rayType>
+                        <rayType name="Shadow">
+                            <rtProgram type="ANY_HIT"     file="optix.ptx" proc="__anyhit__shadow"/> 
+                            <rtProgram type="CLOSEST_HIT" file="optix.ptx" proc="__closesthit__shadow"/> 
+                            <rtProgram type="MISS"        file="optix.ptx" proc="__miss__shadow"/> 
+                        </rayType>
+                    </rtMap>
+                </rtMaterialMap>
                <rtGlobalParams>
                     <param name="lightPos" type="LIGHT" context="CURRENT" id=0 component="POSITION" />
                     <param name="accumBuffer" type="BUFFER" context="Optix Ray Tracer Render Target::accumBuffer"  component="ID"/>               

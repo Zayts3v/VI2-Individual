@@ -177,11 +177,8 @@ extern "C" __global__ void __miss__shadow() {
 }
 
 
-
 // -----------------------------------------------
 // Primary Rays
-
-
 extern "C" __global__ void __raygen__renderFrame() {
 
     const int ix = optixGetLaunchIndex().x;
@@ -263,4 +260,52 @@ extern "C" __global__ void __raygen__renderFrame() {
     optixLaunchParams.frame.colorBuffer[fbIndex] = rgba;
 }
   
+
+extern "C" __global__ void __closesthit__phong_metal() {
+
+    const TriangleMeshSBTData &sbtData
+      = *(const TriangleMeshSBTData*)optixGetSbtDataPointer();  
+
+    // retrieve primitive id and indexes
+    const int   primID = optixGetPrimitiveIndex();
+    const uint3 index  = sbtData.index[primID];
+
+    // get barycentric coordinates
+    const float u = optixGetTriangleBarycentrics().x;
+    const float v = optixGetTriangleBarycentrics().y;
+
+    // compute normal
+    const float4 n
+        = (1.f-u-v) * sbtData.vertexD.normal[index.x]
+        +         u * sbtData.vertexD.normal[index.y]
+        +         v * sbtData.vertexD.normal[index.z];
+    // ray payload
+
+    float3 normal = normalize(make_float3(n));
+
+    // entering glass
+    //if (dot(optixGetWorldRayDirection(), normal) < 0)
+
+    RadiancePRD &prd = *(RadiancePRD*)getPRD<RadiancePRD>();
+
+    const float3 pos = optixGetWorldRayOrigin() + optixGetRayTmax()*optixGetWorldRayDirection();
+    //(1.f-u-v) * A + u * B + v * C;
+    
+    const float glossiness = 20000.0f;
+
+    float3 rayDir;
+    float3 reflectDir = reflect(optixGetWorldRayDirection(), normal);
+    unsigned int seed = prd.seed;
+
+    const float z1 = rnd(seed);
+    const float z2 = rnd(seed);
+    cosine_power_sample_hemisphere( z1, z2, rayDir, glossiness );
+    Onb onb( reflectDir );
+    onb.inverse_transform( rayDir );
+
+    prd.origin = pos;
+    prd.direction = rayDir;
+
+    prd.seed = seed;
+}
 
