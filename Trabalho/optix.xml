@@ -89,7 +89,7 @@
                         </rayType>
                         <rayType name="Shadow">
                             <rtProgram type="ANY_HIT" file="optix.ptx" proc="__anyhit__shadow"/> 
-                            <rtProgram type="CLOSEST_HIT" file="optix.ptx" proc="__closesthit__shadow_glass"/> 
+                            <rtProgram type="CLOSEST_HIT" file="optix.ptx" proc="__closesthit__shadow"/> 
                             <rtProgram type="MISS"       file="optix.ptx" proc="__miss__shadow"/> 
                         </rayType>
                     </rtMap>
